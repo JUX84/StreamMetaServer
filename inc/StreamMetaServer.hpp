@@ -1,12 +1,15 @@
 #include "Server.h"
 
-#include <list>
+#include <unordered_set>
 
 using namespace Player;
 
 class StreamMetaServer : public Server {
 	private:
-		std::list<ServerPrx> servers;
+		ServerPrx serverAM;
+		ServerPrx serverNZ;
+		std::unordered_set<std::string> tokensAM;
+		std::unordered_set<std::string> tokensNZ;
 	public:
 		StreamMetaServer();
 		std::string selectSong(const Song& s, const Ice::Current&);

@@ -7,35 +7,66 @@ StreamMetaServer::StreamMetaServer() {
 	try {
 		ic = Ice::initialize();
 		Ice::ObjectPrx base = ic->stringToProxy("StreamServer:tcp -h zouxe.ovh -p 10000");
-		ServerPrx server = ServerPrx::checkedCast(base);
-		if(!server)
+		serverAM = ServerPrx::checkedCast(base);
+		if(!serverAM)
 			std::cerr << "Invalid proxy\n";
-		servers.push_back(server);
+		base = ic->stringToProxy("StreamServer:tcp -h zouxe.ovh -p 10002");
+		serverNZ = ServerPrx::checkedCast(base);
+		if(!serverNZ)
+			std::cerr << "Invalid proxy\n";
 	} catch (const Ice::Exception& e) {
 		std::cerr << e << '\n';
 	}
 }
 
 std::string StreamMetaServer::selectSong(const Song& s, const Ice::Current& c) {
-	return servers.front()->selectSong(s);
+	std::string token;
+	char tmp = s.artist.at(0);
+	if((tmp>'a' && tmp<='m') || (tmp>'A' && tmp<='M')) {
+		token = serverAM->selectSong(s);
+		tokensAM.emplace(token);
+	} else {
+		token = serverNZ->selectSong(s);
+		tokensNZ.emplace(token);
+	}
+	return token;
 }
 
 void StreamMetaServer::playSong(const std::string& token, const Ice::Current&) {
-	servers.front()->playSong(token);
+	if(tokensAM.find(token) != tokensAM.end())
+		serverAM->playSong(token);
+	else if(tokensNZ.find(token) != tokensNZ.end())
+		serverNZ->playSong(token);
 }
 
 void StreamMetaServer::stopSong(const std::string& token, const Ice::Current&) {
-	servers.front()->stopSong(token);
+	if(tokensAM.find(token) != tokensAM.end())
+		serverAM->stopSong(token);
+	else if(tokensNZ.find(token) != tokensNZ.end())
+		serverNZ->stopSong(token);
 }
 
 void StreamMetaServer::addSong(const Song& s, const Ice::Current&) {
-	servers.front()->addSong(s);
+	char tmp = s.artist.at(0);
+	if((tmp>'a' && tmp<='m') || (tmp>'A' && tmp<='M'))
+		serverAM->addSong(s);
+	else
+		serverNZ->addSong(s);
 }
 
 void StreamMetaServer::removeSong(const Song& s, const Ice::Current&) {
-	servers.front()->removeSong(s);
+	char tmp = s.artist.at(0);
+	if((tmp>'a' && tmp<='m') || (tmp>'A' && tmp<='M'))
+		serverAM->removeSong(s);
+	else
+		serverNZ->removeSong(s);
 }
 
 std::vector<Song> StreamMetaServer::searchSong(const std::string& artist, const std::string& title, const Ice::Current&) {
-	return servers.front()->searchSong(artist, title);
+	std::vector<Song> az, am, nz;
+	am = serverAM->searchSong(artist, title);
+	nz = serverNZ->searchSong(artist, title);
+	az.insert(az.end(), am.begin(), am.end());
+	az.insert(az.end(), nz.begin(), nz.end());
+	return az;
 }
