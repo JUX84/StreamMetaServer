@@ -1,4 +1,4 @@
-CFLAGS=-lIce -lIceUtil -pthread -lvlc
+CFLAGS=-lIce -lIceStorm -lIceUtil -pthread -lvlc
 SRC=src/
 INC=inc/
 OBJ=obj/
@@ -6,10 +6,12 @@ BIN=bin/
 ICE=ice/
 CXX=clang++ -std=c++11 -I$(INC)
 
-all: $(BIN)StreamMetaServer.bin
+default: $(BIN)StreamMetaServer.bin 
 
-run: all
+run: $(BIN)StreamMetaServer.bin 
 	./$(BIN)StreamMetaServer.bin
+
+all: slice default 
 
 slice: $(ICE)Server.ice
 	slice2cpp $< && mv Server.cpp $(SRC) && mv Server.h $(INC)

@@ -6,7 +6,7 @@ int main(int argc, char **argv) {
 	int status = 0;
 	Ice::CommunicatorPtr ic;
 	try {
-		ic = Ice::initialize(argc, argv);
+		ic = Ice::initialize();
 		Ice::ObjectAdapterPtr adapter = ic->createObjectAdapterWithEndpoints("StreamMetaServerAdapter", "tcp -p 10001");
 		Ice::ObjectPtr object = new StreamMetaServer;
 		adapter->add(object, ic->stringToIdentity("StreamMetaServer"));
