@@ -22,7 +22,7 @@ StreamMetaServer::StreamMetaServer() {
 std::string StreamMetaServer::selectSong(const Song& s, const Ice::Current& c) {
 	std::string token;
 	char tmp = s.artist.at(0);
-	if((tmp>'a' && tmp<='m') || (tmp>'A' && tmp<='M')) {
+	if((tmp>='a' && tmp<='m') || (tmp>='A' && tmp<='M')) {
 		token = serverAM->selectSong(s);
 		tokensAM.emplace(token);
 	} else {
@@ -48,7 +48,7 @@ void StreamMetaServer::stopSong(const std::string& token, const Ice::Current&) {
 
 void StreamMetaServer::addSong(const Song& s, const Ice::Current&) {
 	char tmp = s.artist.at(0);
-	if((tmp>'a' && tmp<='m') || (tmp>'A' && tmp<='M'))
+	if((tmp>='a' && tmp<='m') || (tmp>='A' && tmp<='M'))
 		serverAM->addSong(s);
 	else
 		serverNZ->addSong(s);
@@ -56,7 +56,7 @@ void StreamMetaServer::addSong(const Song& s, const Ice::Current&) {
 
 void StreamMetaServer::removeSong(const Song& s, const Ice::Current&) {
 	char tmp = s.artist.at(0);
-	if((tmp>'a' && tmp<='m') || (tmp>'A' && tmp<='M'))
+	if((tmp>='a' && tmp<='m') || (tmp>='A' && tmp<='M'))
 		serverAM->removeSong(s);
 	else
 		serverNZ->removeSong(s);
@@ -69,4 +69,12 @@ std::vector<Song> StreamMetaServer::searchSong(const std::string& artist, const 
 	az.insert(az.end(), am.begin(), am.end());
 	az.insert(az.end(), nz.begin(), nz.end());
 	return az;
+}
+
+void StreamMetaServer::uploadFile(const std::string& name, const ByteSeq& data, const Ice::Current&) {
+	char tmp = name.at(0);
+	if((tmp>='a' && tmp<='m') || (tmp>='A' && tmp<='M'))
+		serverAM->uploadFile(name, data);
+	else
+		serverNZ->uploadFile(name, data);
 }
